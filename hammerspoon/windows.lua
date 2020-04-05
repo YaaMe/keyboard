@@ -137,11 +137,28 @@ function hs.window.upRight(win)
   win:setFrame(f)
 end
 
--- +--------------+
--- |  |        |  |
--- |  |  HERE  |  |
--- |  |        |  |
--- +---------------+
+-- +------------------+
+-- |    +--------+    /
+-- |    |  HERE  |    /
+-- |    +--------+    /
+-- +------------------+
+function hs.window.centerWithHalfHeight(win)
+  local f = win:frame()
+  local screen = win:screen()
+  local max = screen:fullFrame()
+
+  f.x = max.x + (max.w / 10)
+  f.w = max.w * 4/5
+  f.y = max.y + (max.h / 10)
+  f.h = max.h * 4/5
+  win:setFrame(f)
+end
+
+-- +------------------+
+-- |    |        |    |
+-- |    |  HERE  |    |
+-- |    |        |    |
+-- +------------------+
 function hs.window.centerWithFullHeight(win)
   local f = win:frame()
   local screen = win:screen()
