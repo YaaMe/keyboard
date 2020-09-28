@@ -1,11 +1,11 @@
-hs.window.animationDuration = 0
+hs.window.animationDuration = 0.1
 
 -- +-----------------+
 -- |        |        |
 -- |  HERE  |        |
 -- |        |        |
 -- +-----------------+
-function hs.window.left(win)
+function left(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -22,7 +22,7 @@ end
 -- |        |  HERE  |
 -- |        |        |
 -- +-----------------+
-function hs.window.right(win)
+function right(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -39,7 +39,7 @@ end
 -- +-----------------+
 -- |                 |
 -- +-----------------+
-function hs.window.up(win)
+function up(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -56,7 +56,7 @@ end
 -- +-----------------+
 -- |      HERE       |
 -- +-----------------+
-function hs.window.down(win)
+function down(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -73,7 +73,7 @@ end
 -- +--------+        |
 -- |                 |
 -- +-----------------+
-function hs.window.upLeft(win)
+function upLeft(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -90,7 +90,7 @@ end
 -- +--------+        |
 -- |  HERE  |        |
 -- +-----------------+
-function hs.window.downLeft(win)
+function downLeft(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -107,7 +107,7 @@ end
 -- |        +--------|
 -- |        |  HERE  |
 -- +-----------------+
-function hs.window.downRight(win)
+function downRight(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -125,7 +125,7 @@ end
 -- |        +--------|
 -- |                 |
 -- +-----------------+
-function hs.window.upRight(win)
+function upRight(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -142,7 +142,7 @@ end
 -- |    |  HERE  |    /
 -- |    +--------+    /
 -- +------------------+
-function hs.window.centerWithHalfHeight(win)
+function halfAndHalfCenter(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -159,7 +159,7 @@ end
 -- |  |    HERE    |  /
 -- |  +------------+  /
 -- +------------------+
-function hs.window.centerWithHalfHeightWide(win)
+function halfHeightWideCenter(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -176,7 +176,7 @@ end
 -- |    |  HERE  |    |
 -- |    |        |    |
 -- +------------------+
-function hs.window.centerWithFullHeight(win)
+function fullHeightCenter(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:fullFrame()
@@ -193,7 +193,7 @@ end
 -- | HERE |          |
 -- |      |          |
 -- +-----------------+
-function hs.window.left40(win)
+function left40(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -210,7 +210,7 @@ end
 -- |      |   HERE   |
 -- |      |          |
 -- +-----------------+
-function hs.window.right60(win)
+function right60(win)
   local f = win:frame()
   local screen = win:screen()
   local max = screen:frame()
@@ -222,7 +222,7 @@ function hs.window.right60(win)
   win:setFrame(f)
 end
 
-function hs.window.nextScreen(win)
+function nextScreen(win)
   local currentScreen = win:screen()
   local allScreens = hs.screen.allScreens()
   currentScreenIndex = hs.fnutils.indexOf(allScreens, currentScreen)
@@ -234,6 +234,38 @@ function hs.window.nextScreen(win)
     win:moveToScreen(allScreens[1])
   end
 end
+
+function maximize(win)
+  win:maximize()
+end
+
+function moveOneScreenWest(win)
+  win:moveOneScreenWest()
+end
+
+function moveOneScreenEast(win)
+  win:moveOneScreenEast()
+end
+
+local windowActions = {
+  ["maximize"]                 = maximize,
+  ["fullHeightCenter"]     = fullHeightCenter,
+  ["halfAndHalfCenter"]     = halfAndHalfCenter,
+  ["halfHeightWideCenter"] = halfHeightWideCenter,
+  ["left"]                     = left,
+  ["right"]                    = right,
+  ["up"]                       = up,
+  ["down"]                     = down,
+  ["upLeft"]                   = upLeft,
+  ["upRight"]                  = upRight,
+  ["downLeft"]                 = downLeft,
+  ["downRight"]                = downRight,
+  ["left40"]                   = left40,
+  ["right60"]                  = right60,
+  ["nextScreen"]               = nextScreen,
+  ["moveOneScreenWest"]        = moveOneScreenWest,
+  ["moveOneScreenEast"]        = moveOneScreenEast,
+}
 
 windowLayoutMode = hs.hotkey.modal.new({}, 'F16')
 
@@ -266,11 +298,9 @@ local mappings  = windowMappings.mappings
 function getModifiersStr(modifiers)
   local modMap = { shift = '⇧', ctrl = '⌃', alt = '⌥', cmd = '⌘' }
   local retVal = ''
-
   for i, v in ipairs(modifiers) do
     retVal = retVal .. modMap[v]
   end
-
   return retVal
 end
 
@@ -278,21 +308,24 @@ local msgStr = getModifiersStr(modifiers)
 msgStr = 'Window Layout Mode (' .. msgStr .. (string.len(msgStr) > 0 and '+' or '') .. trigger .. ')'
 
 for i, mapping in ipairs(mappings) do
-  local modifiers, trigger, winFunction = table.unpack(mapping)
+  local modifiers, trigger, winAction = table.unpack(mapping)
   local hotKeyStr = getModifiersStr(modifiers)
 
   if showHelp == true then
     if string.len(hotKeyStr) > 0 then
-      msgStr = msgStr .. (string.format('\n%10s+%s => %s', hotKeyStr, trigger, winFunction))
+      msgStr = msgStr .. (string.format('\n%10s+%s => %s', hotKeyStr, trigger, winAction))
     else
-      msgStr = msgStr .. (string.format('\n%11s => %s', trigger, winFunction))
+      msgStr = msgStr .. (string.format('\n%11s => %s', trigger, winAction))
     end
   end
 
   windowLayoutMode:bindWithAutomaticExit(modifiers, trigger, function()
     --example: hs.window.focusedWindow():upRight()
-    local fw = hs.window.focusedWindow()
-    fw[winFunction](fw)
+    local focusedWin = hs.window.focusedWindow()
+    if focusedWin == nil then
+      return
+    end
+    windowActions[winAction](focusedWin)
   end)
 end
 
